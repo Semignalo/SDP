@@ -9,6 +9,7 @@ export default function Register() {
         name: '',
         email: '',
         phone: '',
+        dob: '',
         password: '',
         referralCode: '', // Upstream/Upline code
     });
@@ -51,6 +52,7 @@ export default function Register() {
                 email: formData.email,
                 role: "user",
                 phone: formData.phone,
+                dob: formData.dob,
                 referral_code: myReferralCode,
                 referred_by_code: formData.referralCode || null, // Temporary field until we do lookup
                 referred_by_uid: null, // Logic to find uid from code will be added later or via Cloud Function
@@ -115,6 +117,18 @@ export default function Register() {
                         className="w-full h-12 px-4 rounded-xl border border-gray-300 outline-none focus:border-gold-500 transition"
                         placeholder="08123456789"
                         value={formData.phone}
+                        onChange={handleChange}
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+                    <input
+                        name="dob"
+                        type="date"
+                        required
+                        className="w-full h-12 px-4 rounded-xl border border-gray-300 outline-none focus:border-gold-500 transition"
+                        value={formData.dob}
                         onChange={handleChange}
                     />
                 </div>

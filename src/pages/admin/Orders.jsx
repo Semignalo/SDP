@@ -14,6 +14,9 @@ export default function AdminOrders() {
     const [confirmAction, setConfirmAction] = useState(null); // { type: 'approve'|'reject', order }
     const [processing, setProcessing] = useState(false);
 
+    // View Proof Modal State
+    const [viewProof, setViewProof] = useState(null); // URL string
+
     useEffect(() => {
         const unsubscribeOrders = onSnapshot(query(collection(db, "orders"), orderBy("created_at", "desc")), (snapshot) => {
             setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -175,15 +178,15 @@ export default function AdminOrders() {
                                         </span>
                                     </td>
                                     <td className="p-4">
-                                        <a
-                                            href={order.payment_proof_url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="text-blue-500 flex items-center gap-1 hover:underline"
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setViewProof(order.payment_proof_url);
+                                            }}
+                                            className="text-blue-500 flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-0 p-0"
                                         >
                                             <Eye size={14} /> Lihat
-                                        </a>
+                                        </button>
                                     </td>
                                     <td className="p-4 flex gap-2">
                                         {order.status === 'pending_payment' && (
@@ -251,14 +254,12 @@ export default function AdminOrders() {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Bukti Pembayaran</h3>
-                                    <a
-                                        href={selectedOrder.payment_proof_url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="block bg-blue-50 text-blue-600 p-3 rounded-lg text-center font-bold hover:bg-blue-100 transition"
+                                    <button
+                                        onClick={() => setViewProof(selectedOrder.payment_proof_url)}
+                                        className="w-full bg-blue-50 text-blue-600 p-3 rounded-lg text-center font-bold hover:bg-blue-100 transition"
                                     >
                                         Lihat Bukti Transfer ↗
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
 
@@ -358,13 +359,51 @@ export default function AdminOrders() {
                                 onClick={onConfirmYes}
                                 disabled={processing}
                                 className={`py-2.5 rounded-xl text-white font-bold shadow-lg ${confirmAction.type === 'approve'
-                                        ? 'bg-green-600 hover:bg-green-700'
-                                        : 'bg-red-600 hover:bg-red-700'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : 'bg-red-600 hover:bg-red-700'
                                     }`}
                             >
                                 {processing ? 'Memproses...' : (confirmAction.type === 'approve' ? 'Ya, Terima' : 'Ya, Tolak')}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PAYMENT PROOF MODAL */}
+            {viewProof && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[70] p-4 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setViewProof(null)}>
+                    <div className="relative bg-transparent w-full max-w-4xl h-[85vh] flex flex-col items-center justify-center">
+                        <button
+                            onClick={() => setViewProof(null)}
+                            className="absolute -top-10 right-0 text-white hover:text-gray-300 p-2"
+                        >
+                            <X size={32} />
+                        </button>
+
+                        {viewProof.toLowerCase().includes('.pdf') ? (
+                            <iframe
+                                src={viewProof}
+                                className="w-full h-full bg-white rounded-lg shadow-2xl"
+                                title="Bukti Pembayaran PDF"
+                            />
+                        ) : (
+                            <img
+                                src={viewProof}
+                                alt="Bukti Pembayaran"
+                                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-black"
+                            />
+                        )}
+
+                        <a
+                            href={viewProof}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 text-white text-sm bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition backdrop-blur-md"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            Buka File Asli ↗
+                        </a>
                     </div>
                 </div>
             )}

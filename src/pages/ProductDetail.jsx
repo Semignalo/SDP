@@ -7,7 +7,7 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { getTier, calculateDiscountedPrice } from '../lib/tiers';
 import { formatRupiah } from '../lib/currency';
-import { ArrowLeft, Minus, Plus, ShoppingCart, Share2 } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingCart } from 'lucide-react';
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -71,9 +71,6 @@ export default function ProductDetail() {
             <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-20 pointer-events-none">
                 <button onClick={() => navigate(-1)} className="bg-white/80 backdrop-blur p-2 rounded-full shadow-sm text-gray-700 pointer-events-auto">
                     <ArrowLeft size={24} />
-                </button>
-                <button className="bg-white/80 backdrop-blur p-2 rounded-full shadow-sm text-gray-700 pointer-events-auto">
-                    <Share2 size={24} />
                 </button>
             </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import { Package, Users, ShoppingCart, BarChart, Menu, X } from 'lucide-react';
+import { Package, Users, ShoppingCart, BarChart, Menu, X, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { Link, Routes, Route, useNavigate } from 'react-router-dom';
 import AdminOrders from './Orders';
 import AdminProducts from './Products';
@@ -8,6 +9,7 @@ import AdminUsers from './Users';
 
 function AdminSidebar({ isOpen, setIsOpen }) {
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const menuItems = [
         { name: 'Dashboard', icon: BarChart, path: '/admin' },
@@ -38,24 +40,37 @@ function AdminSidebar({ isOpen, setIsOpen }) {
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-2">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            onClick={() => setIsOpen(false)}
-                            className="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+                <nav className="p-4 flex-1 flex flex-col h-[calc(100vh-4rem)]">
+                    <div className="space-y-2">
+                        {menuItems.map((item) => (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                                <item.icon size={20} className="mr-3" />
+                                <span>{item.name}</span>
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className="mt-auto space-y-2 pb-6">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
                         >
-                            <item.icon size={20} className="mr-3" />
-                            <span>{item.name}</span>
-                        </Link>
-                    ))}
-                    <button
-                        onClick={() => navigate('/')}
-                        className="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors mt-8"
-                    >
-                        Back to App
-                    </button>
+                            <span className="mr-3">🏠</span>
+                            <span>Back to App</span>
+                        </button>
+                        <button
+                            onClick={logout}
+                            className="w-full flex items-center px-4 py-3 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                        >
+                            <LogOut size={20} className="mr-3" />
+                            <span>Logout</span>
+                        </button>
+                    </div>
                 </nav>
             </aside>
         </>

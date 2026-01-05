@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -13,11 +14,20 @@ export default function Login() {
         e.preventDefault();
         setError(''); // Clear previous error
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            navigate('/');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Check Role
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists() && docSnap.data().role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
             setError('Gagal login. Periksa email dan password.');
-            // No locking, just show error
         }
     };
 

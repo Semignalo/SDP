@@ -1,7 +1,8 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import MobileContainer from './components/layout/MobileContainer';
 import BottomNav from './components/layout/BottomNav';
-import PrivateRoute from './components/auth/PrivateRoute'; // Added for PrivateRoute usage
+import PrivateRoute from './components/auth/PrivateRoute';
+import AdminRoute from './components/auth/AdminRoute';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
@@ -32,7 +33,7 @@ function AppContent() {
     <MobileContainer>
       <div className="flex-1 overflow-y-auto no-scrollbar">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/catalog" element={<Catalog />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
@@ -58,7 +59,11 @@ function App() {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/admin/*" element={<AdminLayout />} />
+              <Route path="/admin/*" element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              } />
               <Route path="/*" element={<AppContent />} />
             </Routes>
           </BrowserRouter>

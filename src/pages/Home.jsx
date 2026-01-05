@@ -13,31 +13,62 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchFeatured = async () => {
+        const fetchProducts = async () => {
             try {
-                const q = query(collection(db, "products"), limit(4));
+                // Fetch all products to categorize them client-side
+                // In a real large app, you'd use separate queries with 'where' clauses.
+                const q = query(collection(db, "products"));
                 const snap = await getDocs(q);
                 setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
             } catch (err) {
-                console.error("Failed to load featured products", err);
+                console.error("Failed to load products", err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchFeatured();
+        fetchProducts();
     }, []);
 
     const totalSpent = userData?.total_spent || 0;
     const currentTier = getTier(totalSpent, userData?.is_star_center);
     const nextTier = TIERS.find(t => t.level === currentTier.level + 1);
 
-
     const progress = nextTier
         ? Math.min(100, Math.max(0, ((totalSpent - currentTier.minSpent) / (nextTier.minSpent - currentTier.minSpent)) * 100))
         : 100;
 
+    // Filter Products by Category/Attributes
+    const promoProducts = products.filter(p => p.is_promo === true);
+    const serumProducts = products.filter(p => p.category === 'Face & Body Serum');
+    const trioProducts = products.filter(p => p.category === 'Trio Holistic');
+
+    // Fallback: If no category matches, maybe show them in a "General" or mixed section? 
+    // The user specifically asked for these 3. I'll just show these 3 for now as requested.
+
+    const ProductSection = ({ title, items }) => (
+        <section>
+            <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-bold text-gray-800">{title}</h3>
+                {items.length > 4 && (
+                    <button className="text-gold-600 text-sm font-medium flex items-center">
+                        View All <ArrowRight size={16} className="ml-1" />
+                    </button>
+                )}
+            </div>
+            {items.length === 0 ? (
+                <div className="text-gray-400 text-sm italic py-4">Belum ada produk di kategori ini.</div>
+            ) : (
+                <div className="grid grid-cols-2 gap-3">
+                    {items.slice(0, 4).map((product) => ( // Limit to 4 for display
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
+            )}
+        </section>
+    );
+
     return (
-        <div className="p-4 space-y-6 pb-24">
+        <div className="p-4 space-y-8 pb-24">
             <header className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-star-dark">Star Digital</h1>
@@ -74,25 +105,22 @@ export default function Home() {
                 <div className="absolute -right-4 -bottom-10 w-32 h-32 bg-gold-500/20 rounded-full blur-2xl" />
             </section>
 
-            <section>
-                <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-lg font-bold">Featured Products</h3>
-                    <button className="text-gold-600 text-sm font-medium flex items-center">
-                        View All <ArrowRight size={16} className="ml-1" />
-                    </button>
+            {loading ? (
+                <div className="space-y-4">
+                    <div className="bg-white h-8 w-1/3 rounded animate-pulse" />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white h-48 rounded-xl shadow-sm animate-pulse" />
+                        <div className="bg-white h-48 rounded-xl shadow-sm animate-pulse" />
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {loading ? (
-                        Array(4).fill(0).map((_, i) => (
-                            <div key={i} className="bg-white h-48 rounded-xl shadow-sm animate-pulse" />
-                        ))
-                    ) : (
-                        products.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))
-                    )}
-                </div>
-            </section>
+            ) : (
+                <>
+                    <ProductSection title="Special Promo" items={promoProducts} />
+                    <ProductSection title="Face & Body Serum" items={serumProducts} />
+                    <ProductSection title="Trio Holistic" items={trioProducts} />
+                </>
+            )}
         </div>
     );
 }
+

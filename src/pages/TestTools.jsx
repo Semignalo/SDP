@@ -35,7 +35,7 @@ Oleskan tebal dan merata pada seluruh tubuh (tangan, kaki, leher) setelah mandi 
 No. BPOM: NA18220110136`,
             base_price: 222500,
             stock: 100,
-            category: "Body Care",
+            category: "Face & Body Serum",
             image_url: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -54,7 +54,7 @@ Lihat deskripsi varian Jar untuk detail lengkap. Praktis dibawa kemana saja.
 No. BPOM: NA18220110136`,
             base_price: 71500,
             stock: 100,
-            category: "Body Care",
+            category: "Face & Body Serum",
             image_url: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -85,7 +85,7 @@ Gunakan setiap pagi setelah mandi sebelum beraktivitas.
 No. BPOM: NA18220110135`,
             base_price: 60500,
             stock: 100,
-            category: "Body Care",
+            category: "Face & Body Serum",
             image_url: "https://images.unsplash.com/photo-1620917670397-a63ddb71a10d?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -104,7 +104,7 @@ Lihat deskripsi varian Tube untuk detail lengkap. Kemasan botol pump lebih hemat
 No. BPOM: NA18220110135`,
             base_price: 200500,
             stock: 50,
-            category: "Body Care",
+            category: "Face & Body Serum",
             image_url: "https://images.unsplash.com/photo-1620917670397-a63ddb71a10d?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -133,7 +133,7 @@ Semprotkan 2-3 pump pada ketiak kering setelah mandi.
 No. BPOM: NA18220900302`,
             base_price: 162500,
             stock: 50,
-            category: "Body Care",
+            category: "Face & Body Serum",
             image_url: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -162,7 +162,7 @@ Oleskan stick pada wajah yang bersih.
 No. BPOM: NA18231900060`,
             base_price: 325500,
             stock: 40,
-            category: "Skincare",
+            category: "Face & Body Serum",
             image_url: "https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -187,7 +187,7 @@ Larutkan 1 sachet dengan 150ml air. Minum 1x sehari malam sebelum tidur.
 Izin: MD & Halal MUI`,
             base_price: 144500,
             stock: 30,
-            category: "Health Drink",
+            category: "Trio Holistic",
             image_url: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -198,7 +198,7 @@ Izin: MD & Halal MUI`,
 Izin: MD & Halal MUI`,
             base_price: 367500,
             stock: 20,
-            category: "Health Drink",
+            category: "Trio Holistic",
             image_url: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -221,7 +221,7 @@ Minum sebelum makan siang atau makan malam.
 Izin: BPOM MD`,
             base_price: 150500,
             stock: 50,
-            category: "Slimming",
+            category: "Trio Holistic",
             image_url: "https://images.unsplash.com/photo-1511690656952-34342d5c2895?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -232,7 +232,7 @@ Izin: BPOM MD`,
 Izin: BPOM MD`,
             base_price: 383500,
             stock: 20,
-            category: "Slimming",
+            category: "Trio Holistic",
             image_url: "https://images.unsplash.com/photo-1511690656952-34342d5c2895?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -257,7 +257,7 @@ Oleskan pada area berlemak (perut/paha) sebelum olahraga.
 No. BPOM: NA`,
             base_price: 209000,
             stock: 60,
-            category: "Slimming",
+            category: "Trio Holistic",
             image_url: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=300",
             is_active: true
         },
@@ -282,7 +282,8 @@ Izin: BPOM TR`,
             stock: 40,
             category: "Herbal",
             image_url: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=300",
-            is_active: true
+            is_active: true,
+            is_promo: true
         },
         {
             name: "Prime Herbs (60 Caps)",
@@ -293,7 +294,8 @@ Izin: BPOM TR`,
             stock: 30,
             category: "Herbal",
             image_url: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=300",
-            is_active: true
+            is_active: true,
+            is_promo: true
         }
     ];
 

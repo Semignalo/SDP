@@ -8,11 +8,13 @@ import { addDoc, collection, serverTimestamp, doc, updateDoc, increment } from '
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../context/AuthContext';
 import { getTier, calculateDiscountedPrice } from '../lib/tiers';
+import { useToast } from '../context/ToastContext';
 
 export default function Checkout() {
     const { cart, totalItems, clearCart } = useCart();
     const { currentUser, userData } = useAuth();
     const navigate = useNavigate();
+    const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -47,16 +49,27 @@ export default function Checkout() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!address || !paymentFile) return alert("Mohon lengkapi alamat dan bukti transfer");
+
+        if (!address) {
+            return addToast("Mohon lengkapi alamat pengiriman.", "error");
+        }
+        if (!paymentFile) {
+            return addToast("Mohon upload bukti transfer.", "error");
+        }
 
         setLoading(true);
         try {
-            if (!currentUser) return alert("Silakan login user terlebih dahulu.");
+            if (!currentUser) {
+                addToast("Sesi habis, silakan login kembali.", "error");
+                return;
+            }
 
-            // Simulation delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            const proofUrl = "https://placehold.co/400x600?text=Bukti+Transfer+Dummy";
+            // 1. Upload Payment Proof
+            const fileRef = ref(storage, `payment_proofs/${Date.now()}_${paymentFile.name}`);
+            await uploadBytes(fileRef, paymentFile);
+            const proofUrl = await getDownloadURL(fileRef);
 
+            // 2. Create Order Data
             const orderData = {
                 user_id: currentUser.uid,
                 items: cart,
@@ -68,14 +81,16 @@ export default function Checkout() {
                 created_at: serverTimestamp()
             };
 
+            // 3. Save to Firestore
             await addDoc(collection(db, "orders"), orderData);
 
             clearCart();
             setShowSuccessModal(true);
+            addToast("Pesanan berhasil dibuat!", "success");
 
         } catch (err) {
             console.error(err);
-            alert("Gagal checkout: " + err.message);
+            addToast("Gagal checkout: " + err.message, "error");
         } finally {
             setLoading(false);
         }
@@ -134,19 +149,43 @@ export default function Checkout() {
                         <p className="text-xs text-gray-500 mt-1">a/n Star Digital Program</p>
                     </div>
 
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors">
                         <input
                             type="file"
                             id="proof"
                             className="hidden"
-                            accept="image/*"
-                            onChange={(e) => setPaymentFile(e.target.files[0])}
+                            accept="image/jpeg,image/png,application/pdf"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Validation: Max 5MB
+                                    if (file.size > 5 * 1024 * 1024) {
+                                        addToast("Ukuran file terlalu besar! Maksimal 5MB.", "error");
+                                        e.target.value = null; // Reset input
+                                        return;
+                                    }
+                                    // Validation: Type
+                                    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
+                                        addToast("Format file tidak didukung. Gunakan JPG, PNG, atau PDF.", "error");
+                                        e.target.value = null;
+                                        return;
+                                    }
+                                    setPaymentFile(file);
+                                }
+                            }}
                         />
-                        <label htmlFor="proof" className="cursor-pointer flex flex-col items-center gap-2">
-                            <Upload className="text-gray-400" />
-                            <span className="text-sm text-gray-600 font-medium">
-                                {paymentFile ? paymentFile.name : "Upload Bukti Transfer"}
+                        <label htmlFor="proof" className="cursor-pointer flex flex-col items-center gap-2 w-full">
+                            <Upload className={`w-8 h-8 ${paymentFile ? 'text-green-500' : 'text-gray-400'}`} />
+                            <span className="text-sm text-gray-700 font-medium">
+                                {paymentFile ? (
+                                    <span className="text-green-600 font-bold">{paymentFile.name}</span>
+                                ) : (
+                                    "Klik untuk Upload Bukti Transfer"
+                                )}
                             </span>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Format: JPG, PNG, PDF. Maksimal 5MB.
+                            </p>
                         </label>
                     </div>
                 </div>
