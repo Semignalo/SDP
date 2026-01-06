@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { Copy, Users, Wallet } from 'lucide-react';
+import { Copy, Users, Wallet, Link as LinkIcon, Share2 } from 'lucide-react';
 import { formatRupiah } from '../lib/currency';
 
 export default function Referral() {
@@ -11,6 +11,7 @@ export default function Referral() {
     const [commissions, setCommissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,6 +60,15 @@ export default function Referral() {
         }
     };
 
+    const copyLink = () => {
+        if (userData?.referral_code) {
+            const link = `${window.location.origin}/register?ref=${userData.referral_code}`;
+            navigator.clipboard.writeText(link);
+            setLinkCopied(true);
+            setTimeout(() => setLinkCopied(false), 2000);
+        }
+    };
+
     return (
         <div className="p-4 space-y-6 pb-24">
             <h1 className="text-2xl font-bold">Referral Program</h1>
@@ -87,6 +97,24 @@ export default function Referral() {
                 </div>
                 <p className="text-xs text-green-600 mt-2 min-h-[16px]">
                     {copied ? "Berhasil disalin!" : "Ketuk untuk menyalin"}
+                </p>
+            </div>
+
+            {/* Share Link Card */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
+                <p className="text-sm text-gray-500 mb-2">Atau Bagikan Link Pendaftaran</p>
+                <div
+                    onClick={copyLink}
+                    className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-center gap-3 cursor-pointer active:bg-blue-100 transition"
+                >
+                    <LinkIcon size={18} className="text-blue-600" />
+                    <span className="font-medium text-blue-700">
+                        Salin Link Referral
+                    </span>
+                    {linkCopied && <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full ml-2">Tersalin!</span>}
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                    Orang yang mendaftar lewat link ini otomatis menjadi downline Anda.
                 </p>
             </div>
 

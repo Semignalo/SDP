@@ -362,6 +362,32 @@ Izin: BPOM TR`,
         }
     };
 
+    const migrateReferralCodes = async () => {
+        if (!window.confirm("PERINGATAN: Ini akan mengubah kode referral SEMUA user menjadi format baru (STRxxxxx). Link referral lama user mungkin tidak akan bekerja lagi. Lanjutkan?")) return;
+
+        setStatus('Starting Referral Migration...');
+        try {
+            const usersRef = collection(db, "users");
+            const snapshot = await getDocs(usersRef);
+            let updatedCount = 0;
+
+            for (const userDoc of snapshot.docs) {
+                // Generate new format: STR + 5 digits
+                const randomDigits = Math.floor(10000 + Math.random() * 90000);
+                const newCode = `STR${randomDigits}`;
+
+                await updateDoc(doc(db, "users", userDoc.id), {
+                    referral_code: newCode
+                });
+                updatedCount++;
+            }
+            setStatus(`Success! Updated ${updatedCount} users to new Referral Code format.`);
+        } catch (e) {
+            console.error(e);
+            setStatus('Error: ' + e.message);
+        }
+    };
+
     return (
         <div className="p-6 pb-24 space-y-6">
             <h1 className="text-2xl font-bold text-red-600">⚠️ Developer Test Tools</h1>
@@ -423,6 +449,12 @@ Izin: BPOM TR`,
                     className="w-full bg-purple-100 text-purple-700 py-2 rounded-lg text-sm font-medium"
                 >
                     Migrate: Fill Missing Phones (Random)
+                </button>
+                <button
+                    onClick={migrateReferralCodes}
+                    className="w-full bg-yellow-100 text-yellow-700 py-2 rounded-lg text-sm font-medium"
+                >
+                    Migrate: Update All Referral Codes (STRxxxxx)
                 </button>
             </div>
 

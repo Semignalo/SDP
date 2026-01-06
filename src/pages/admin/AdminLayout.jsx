@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
-import { Package, Users, ShoppingCart, BarChart, Menu, X, LogOut } from 'lucide-react';
+import { Package, Users, ShoppingCart, BarChart, Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, Routes, Route, useNavigate } from 'react-router-dom';
 import AdminOrders from './Orders';
 import AdminProducts from './Products';
 import AdminUsers from './Users';
+import AdminSettings from './Settings';
 
 function AdminSidebar({ isOpen, setIsOpen }) {
     const navigate = useNavigate();
@@ -16,6 +17,7 @@ function AdminSidebar({ isOpen, setIsOpen }) {
         { name: 'Pesanan', icon: ShoppingCart, path: '/admin/orders' },
         { name: 'Produk', icon: Package, path: '/admin/products' },
         { name: 'Users / Center', icon: Users, path: '/admin/users' },
+        { name: 'Pengaturan', icon: Settings, path: '/admin/settings' },
     ];
 
     return (
@@ -106,6 +108,7 @@ export default function AdminLayout() {
                         <Route path="/orders" element={<AdminOrders />} />
                         <Route path="/products" element={<AdminProducts />} />
                         <Route path="/users" element={<AdminUsers />} />
+                        <Route path="/settings" element={<AdminSettings />} />
                     </Routes>
                 </main>
             </div>

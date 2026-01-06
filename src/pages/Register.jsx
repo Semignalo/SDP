@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { auth, db } from '../lib/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -14,18 +14,60 @@ export default function Register() {
         referralCode: '', // Upstream/Upline code
     });
     const [loading, setLoading] = useState(false);
+    const [referralOwner, setReferralOwner] = useState(null);
+    const [checkingReferral, setCheckingReferral] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const refCode = params.get('ref');
+        if (refCode) {
+            setFormData(prev => ({ ...prev, referralCode: refCode }));
+        }
+    }, [location]);
+
+    useEffect(() => {
+        const checkReferral = async () => {
+            const code = formData.referralCode;
+            if (!code || code.length < 3) {
+                setReferralOwner(null);
+                return;
+            }
+
+            setCheckingReferral(true);
+            try {
+                const q = query(collection(db, "users"), where("referral_code", "==", code));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    setReferralOwner(querySnapshot.docs[0].data().name);
+                } else {
+                    setReferralOwner(null);
+                }
+            } catch (err) {
+                console.error("Error checking referral:", err);
+            } finally {
+                setCheckingReferral(false);
+            }
+        };
+
+        const timeoutId = setTimeout(() => {
+            if (formData.referralCode) checkReferral();
+        }, 800);
+
+        return () => clearTimeout(timeoutId);
+    }, [formData.referralCode]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const generateReferralCode = (name) => {
-        // Simple logic: First 3 letters of name + random 4 alphanum
-        const prefix = name.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
-        const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-        return `${prefix}${suffix}`;
+    const generateReferralCode = () => {
+        // Format: STR + 5 random digits (e.g., STR12345)
+        const randomDigits = Math.floor(10000 + Math.random() * 90000); // Ensures 5 digits
+        return `STR${randomDigits}`;
     };
 
     const handleRegister = async (e) => {
@@ -39,7 +81,7 @@ export default function Register() {
             const user = userCredential.user;
 
             // 2. Generate own referral code
-            const myReferralCode = generateReferralCode(formData.name);
+            const myReferralCode = generateReferralCode();
 
             // 3. Create User Document in Firestore
             // Note: We are not validating the 'upstream' referral code yet (Phase 2)
@@ -156,6 +198,12 @@ export default function Register() {
                         value={formData.referralCode}
                         onChange={handleChange}
                     />
+                    {checkingReferral && <p className="text-xs text-gray-400 mt-1">Mengecek kode...</p>}
+                    {!checkingReferral && formData.referralCode && (
+                        <p className={`text-xs mt-1 font-medium ${referralOwner ? 'text-green-600' : 'text-red-500'}`}>
+                            {referralOwner ? `Referral dari: ${referralOwner}` : 'Kode referral tidak ditemukan'}
+                        </p>
+                    )}
                 </div>
 
                 <button

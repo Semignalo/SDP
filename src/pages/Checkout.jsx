@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatRupiah } from '../lib/currency';
 import { ArrowLeft, Upload, CreditCard, CheckCircle } from 'lucide-react';
 import { auth, db, storage } from '../lib/firebase';
-import { addDoc, collection, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../context/AuthContext';
 import { getTier, calculateDiscountedPrice } from '../lib/tiers';
@@ -18,6 +18,41 @@ export default function Checkout() {
     const [loading, setLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+    // Form State
+    const [address, setAddress] = useState('');
+    const [courier, setCourier] = useState('jne');
+    const [paymentFile, setPaymentFile] = useState(null);
+
+    // Bank Details State
+    const [bankDetails, setBankDetails] = useState({
+        bank_name: 'BCA',
+        account_number: '1234567890',
+        account_holder: 'Star Digital Program'
+    });
+
+    // Fetch Bank Settings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const docRef = doc(db, "settings", "general");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Only update if data exists to prevent overriding defaults with undefined
+                    setBankDetails(prev => ({
+                        ...prev,
+                        bank_name: data.bank_name || prev.bank_name,
+                        account_number: data.account_number || prev.account_number,
+                        account_holder: data.account_holder || prev.account_holder
+                    }));
+                }
+            } catch (err) {
+                console.error("Failed to load bank settings", err);
+            }
+        };
+        fetchSettings();
+    }, []);
+
     if (!currentUser) {
         return (
             <div className="p-8 flex flex-col items-center justify-center min-h-screen text-center">
@@ -30,11 +65,6 @@ export default function Checkout() {
         );
     }
 
-    // Form State
-    const [address, setAddress] = useState('');
-    const [courier, setCourier] = useState('jne');
-    const [paymentFile, setPaymentFile] = useState(null);
-
     // Simple hardcoded shipping cost for now
     const shippingCost = 20000;
 
@@ -42,7 +72,6 @@ export default function Checkout() {
         const tier = getTier(userData?.total_spent || 0, userData?.is_star_center);
         return cart.reduce((acc, item) => {
             const { discountedPrice } = calculateDiscountedPrice(item.base_price, tier);
-
             return acc + (discountedPrice * item.qty);
         }, 0);
     };
@@ -144,9 +173,9 @@ export default function Checkout() {
                     </h3>
 
                     <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                        <p className="text-xs text-gray-500 mb-1">Transfer ke Bank BCA</p>
-                        <p className="font-mono font-bold text-lg text-blue-800">123 456 7890</p>
-                        <p className="text-xs text-gray-500 mt-1">a/n Star Digital Program</p>
+                        <p className="text-xs text-gray-500 mb-1">Transfer ke Bank {bankDetails.bank_name}</p>
+                        <p className="font-mono font-bold text-lg text-blue-800">{bankDetails.account_number}</p>
+                        <p className="text-xs text-gray-500 mt-1">a/n {bankDetails.account_holder}</p>
                     </div>
 
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors">
